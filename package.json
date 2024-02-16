@@ -9,11 +9,12 @@
     "lint": "next lint"
   },
   "prisma": {
-    "seed": "ts-node --transpile-only prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@nextui-org/react": "^2.2.9",
     "@prisma/client": "^5.9.1",
+    "bcryptjs": "^2.4.3",
     "framer-motion": "^11.0.5",
     "next": "14.1.0",
     "prisma": "^5.9.1",
