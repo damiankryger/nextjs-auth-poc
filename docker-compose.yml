@@ -1,0 +1,57 @@
+version: '3.7'
+
+services:
+  node:
+    build:
+      dockerfile: ./docker/node/Dockerfile
+      target: application
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./:/home/node/app
+    depends_on:
+      - pgsql
+    networks:
+      - application
+
+  pgsql:
+    image: 'postgres:15'
+    ports:
+      - '5432:5432'
+    environment:
+      PGPASSWORD: '${DB_PASSWORD:-secret}'
+      POSTGRES_DB: '${DB_DATABASE}'
+      POSTGRES_USER: '${DB_USERNAME}'
+      POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+    volumes:
+      - 'data-pgsql:/var/lib/postgresql/data'
+    healthcheck:
+      test:
+        - CMD
+        - pg_isready
+        - '-q'
+        - '-d'
+        - '${DB_DATABASE}'
+        - '-U'
+        - '${DB_USERNAME}'
+      retries: 3
+      timeout: 5s
+    networks:
+      - application
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - '8080:8080'
+    depends_on:
+      - pgsql
+    networks:
+      - application
+
+volumes:
+  data-pgsql:
+    driver: local
+networks:
+  application:
+    driver: bridge
