@@ -1,9 +1,39 @@
 'use client'
 
-import {Form, Formik} from "formik";
+import {Form, Formik, FormikHelpers} from "formik";
 import {Button, Input} from "@nextui-org/react";
+import {signIn} from "next-auth/react";
+import * as Yup from "yup"
 
-const Login = () => {
+interface Values {
+    email: string,
+    password: string
+}
+
+interface Props {
+    searchParams: { error?: string }
+}
+
+const SignInSchema = Yup.object().shape({
+    email: Yup.string()
+        .email()
+        .required(),
+    password: Yup.string()
+        .required()
+})
+
+const Login = ({searchParams}: Props) => {
+    const handleSubmit = async (
+        values: Values,
+        formikHelpers: FormikHelpers<Values>
+    ) => {
+        await signIn("credentials", {
+            email: values.email,
+            password: values.password,
+            callbackUrl: '/'
+        })
+    }
+
     return <div className={'w-screen h-screen flex items-center justify-center'}>
         <div className={'border rounded-xl py-4 px-8 shadow-2xl'}>
             <h1 className={'text-center mb-8 font-bold text-2xl'}>Next.js Auth PoC</h1>
@@ -12,18 +42,40 @@ const Login = () => {
                     email: '',
                     password: ''
                 }}
-                onSubmit={(values, formikHelpers) => {
-                    setTimeout(() => {
-                        alert(JSON.stringify(values, null, 2))
-                        formikHelpers.setSubmitting(false);
-                    })
-                }}
+                onSubmit={handleSubmit}
+                validationSchema={SignInSchema}
+                validateOnBlur={false}
+                validateOnChange={false}
             >
-                <Form>
-                    <Input type={'email'} variant={'flat'} label={'Email'} placeholder={'Enter your email'} className={'w-64 mb-4'}/>
-                    <Input type={'password'} variant={'flat'} label={'Password'} placeholder={'Enter your password'} className={'w-64 mb-8'}/>
-                    <Button color={'primary'} className={'w-64'}>Log in</Button>
-                </Form>
+                {
+                    ({errors, touched, handleChange, handleBlur}) => {
+                        return <Form>
+                            <Input
+                                type={'email'}
+                                variant={'flat'}
+                                label={'Email'}
+                                name={'email'}
+                                placeholder={'Enter your email'}
+                                className={'w-64 mb-4'}
+                                isInvalid={Boolean(errors.email)}
+                                errorMessage={errors.email}
+                                onChange={handleChange}
+                                onBlur={handleBlur}/>
+                            <Input
+                                type={'password'}
+                                variant={'flat'}
+                                label={'Password'}
+                                name={'password'}
+                                placeholder={'Enter your password'}
+                                className={'w-64 mb-8'}
+                                isInvalid={Boolean(errors.password)}
+                                errorMessage={errors.password}
+                                onChange={handleChange}
+                                onBlur={handleBlur}/>
+                            <Button color={'primary'} className={'w-64'} type={'submit'}>Log in</Button>
+                        </Form>
+                    }
+                }
             </Formik>
         </div>
     </div>
