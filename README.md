@@ -1,36 +1,37 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+This is a proof of concept of the authentication implemented using Next.js, Next-ui, Next-auth, Prisma. My goal was to test these libraries and set up working authentication inside the Next.js application.
 
 ## Getting Started
 
-First, run the development server:
+After cloning this repository, run the command to create your personal auth key:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+openssl rand -base64 32
+```
+
+Copy the existing `.env` file and rename it as `.env.local`. Previously created key fill in the missing variable.
+
+After that, run `docker compose` command to launch the developer environment. To do that, use the command:
+
+```bash
+docker compose up -d --build
+```
+
+It will pull the required images, and build the image for the next.js application.
+
+The next step is to execute database migrations. Database integration has been implemented using Prisma ORM. Using `docker compose`, execute the migration command:
+
+```bash
+docker compose exec node npx prisma migrate dev
+```
+
+When you have the proper schema in your database, it's time to execute the seeder to add the required first user. To do that, use the command mentioned below:
+
+```bash
+docker compose exec node npx prisma db seed
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Testing login form
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+When you have properly set the environment, you can try to login. The default user has `admin@example.com` email and `qwerty123` password. After successful login, you should see page with message and button to logout. Click it. You should be back, on the page with login form.
